@@ -762,3 +762,25 @@ not the specific names.
 
 Reviewers should reject new change-detector tests; authors should convert
 them into invariants before re-requesting review.
+
+## Cursor Cloud specific instructions
+
+### Environment overview
+
+| Component | Description | Run command |
+|-----------|-------------|-------------|
+| Python (core) | `hermes-agent` package, all tools, gateway, CLI | `source .venv/bin/activate && hermes` |
+| TUI (Node.js) | Ink/React terminal UI | `cd ui-tui && npm run dev` |
+| Web dashboard | Vite+React SPA | `cd web && npm run dev` |
+| Tests (Python) | ~19k pytest tests | `scripts/run_tests.sh` |
+| Tests (TUI) | Vitest suite (548 tests) | `cd ui-tui && npm test` |
+
+### Gotchas
+
+- **`pip` must be installed in the venv** — `uv venv` does not include `pip` by default. `scripts/run_tests.sh` needs `pip` to install `pytest-split` on first run. Install it with `uv pip install pip pytest-split` after creating the venv.
+- **`simple_term_menu` can steal TTY in tmux** — Some tests that import the setup wizard can trigger an interactive curses menu. Set `TERM=dumb` if running full test suite in tmux to prevent blocking.
+- **Ruff is configured to exclude all files** (`exclude = ["*"]` in `pyproject.toml`), so `ruff check .` passes trivially. Python linting is effectively a no-op in this repo's ruff config.
+- **TUI ESLint has pre-existing warnings** (33 warnings, 4 errors) — these are in the existing codebase, not introduced by changes.
+- **No API keys needed for tests** — `scripts/run_tests.sh` unsets all credential env vars. Tests are fully hermetic.
+- **Web dashboard build outputs to `hermes_cli/web_dist/`** — Vite is configured with `outDir: ../hermes_cli/web_dist`. The `hermes dashboard` command serves from this path.
+- Standard lint/test/build commands are documented in the `AGENTS.md` Testing section and `ui-tui` Dev Commands section above — refer to those.
